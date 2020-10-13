@@ -14,7 +14,7 @@ jobs:
         with:
             node-version: '14'
 
-      - name: Checkout project
+      - name: Checkout repository
         uses: actions/checkout@v2
 
       - name: Install dependencies
@@ -22,6 +22,30 @@ jobs:
 
       - name: Lint files
         run: npm run lint
+
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          # Récupérer au moins les parents immédiats afin que dans le cas une
+          # d'une pull-request, la tête puisse être vérifiée.
+          fetch-depth: 2
+
+      # Si cette exécution a été déclenchée par une pull-request : vérifier la
+      # la tête (à la place du commit de merge).
+      - name: Checkout the head
+        run: git checkout HEAD^2
+        if: ${{ 'pull_request' == github.event_name }}
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: 'javascript'
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
 
   test:
     runs-on: ubuntu-latest
@@ -31,7 +55,7 @@ jobs:
         with:
             node-version: '14'
 
-      - name: Checkout project
+      - name: Checkout repository
         uses: actions/checkout@v2
 
       - name: Install dependencies
@@ -52,7 +76,7 @@ jobs:
         with:
             node-version: '14'
 
-      - name: Checkout project
+      - name: Checkout repository
         uses: actions/checkout@v2
 
       - name: Install dependencies
